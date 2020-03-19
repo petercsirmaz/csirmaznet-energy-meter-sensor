@@ -1,0 +1,16 @@
+{
+    "sensorId": "sensor1",
+    "p1": {
+        "emulator": true,
+        "debug": false
+    },
+    "influx": {
+        "host": "10.10.0.178",
+        "port": 8086,
+        "database": "consumption",
+        "measurement": {
+            "electricity": "electricity",
+            "gas": "gas"
+        }
+    }
+}
