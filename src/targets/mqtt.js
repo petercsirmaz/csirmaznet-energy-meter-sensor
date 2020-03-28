@@ -3,7 +3,7 @@ const mqtt = require('mqtt');
 module.exports = (config) => {
     
 
-    const publishElectricity = (sensorId, data) => {
+    const publishElectricity = (sensorId, data, timestamp) => {
         return new Promise((resolve, reject) => {
             const client = mqtt.connect(config.host);
             
@@ -13,6 +13,7 @@ module.exports = (config) => {
                         config.topics.electricity, 
                         JSON.stringify({
                             sensor: sensorId,
+                            timestamp: timestamp,
                             received: data.received.actual.reading,
                             delivered: data.delivered.actual.reading
                     }));
@@ -32,6 +33,7 @@ module.exports = (config) => {
                         config.topics.gas, 
                         JSON.stringify({
                             sensor: sensorId,
+                            timestamp: data.timestamp,
                             reading: data.reading,
                     }));
                     resolve();

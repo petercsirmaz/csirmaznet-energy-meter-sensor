@@ -35,7 +35,7 @@ reader.on('reading', data => {
 
     if (mqtt) {
         Promise.all([
-            mqtt.publishElectricity(config.sensorId, data.electricity)
+            mqtt.publishElectricity(config.sensorId, data.electricity, data.timestamp)
                 .then(() => logger.log(
                     'Electricity readings published on mqtt borker.',
                     start
