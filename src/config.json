@@ -12,5 +12,12 @@
             "electricity": "electricity",
             "gas": "gas"
         }
+    },
+    "mqtt": {
+        "host": "mqtt://10.10.0.178",
+        "topics": {
+            "electricity": "electricity",
+            "gas": "gas"
+        }
     }
 }

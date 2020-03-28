@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "influx": "^5.5.1",
+    "mqtt": "^3.0.0",
     "p1-reader": "^1.5.1"
   }
 }
