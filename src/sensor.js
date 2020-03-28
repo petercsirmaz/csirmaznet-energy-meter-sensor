@@ -101,7 +101,7 @@ const log = (message, date) => {
     const nowDate = new Date();
     const logMessage = '[' + getTimeFromDate(nowDate) + '] ' + message;
     console.log(date 
-        ? logMessage + ' (' + (nowDate - refDate) + ' ms)'
+        ? logMessage + ' (' + (nowDate - date) + ' ms)'
         : logMessage
     );
 }
