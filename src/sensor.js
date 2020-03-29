@@ -16,6 +16,12 @@ const logger = loggerModule();
 reader.on('reading', data => {
     const start = new Date();
 
+    const eReceived = data.electricity.received.actual.reading + ' ' + data.electricity.received.actual.unit;
+    const eDelivered = data.electricity.delivered.actual.reading + ' ' + data.electricity.delivered.actual.unit;
+    const gasReadings = data.gas.reading + ' ' + data.gas.unit;
+
+    logger.log('Data received form sensor (received: ' + eReceived + ', delivered: ' + eDelivered + ', gas: ' + gasReadings + ')');
+
     if (influx) {
         Promise.all([
             influx.saveElectricity(config.sensorId, data.electricity)
@@ -35,12 +41,12 @@ reader.on('reading', data => {
 
     if (mqtt) {
         Promise.all([
-            mqtt.publishElectricity(config.sensorId, data.electricity, data.timestamp)
+            mqtt.publishElectricity(data.electricity, data.timestamp)
                 .then(() => logger.log(
                     'Electricity readings published on mqtt borker.',
                     start
                 )),
-            mqtt.publishGas(config.sensorId, data.gas)
+            mqtt.publishGas(data.gas)
                 .then(() => logger.log(
                     'Gas readings published on mqtt borker.',
                     start,

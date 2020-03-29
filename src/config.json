@@ -16,8 +16,8 @@
     "mqtt": {
         "host": "mqtt://10.10.0.178",
         "topics": {
-            "electricity": "electricity",
-            "gas": "gas"
+            "electricity": "home/meters/sensor1/electricity",
+            "gas": "home/meters/sensor1/gas"
         }
     }
 }

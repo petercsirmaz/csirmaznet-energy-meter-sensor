@@ -3,7 +3,7 @@ const mqtt = require('mqtt');
 module.exports = (config) => {
     
 
-    const publishElectricity = (sensorId, data, timestamp) => {
+    const publishElectricity = (data, timestamp) => {
         return new Promise((resolve, reject) => {
             const client = mqtt.connect(config.host);
             
@@ -12,18 +12,24 @@ module.exports = (config) => {
                     client.publish(
                         config.topics.electricity, 
                         JSON.stringify({
-                            sensor: sensorId,
                             timestamp: timestamp,
-                            received: data.received.actual.reading,
-                            delivered: data.delivered.actual.reading
+                            received:  {
+                                reading: data.received.actual.reading,
+                                unit: data.received.actual.unit
+                            },
+                            delivered: {
+                                reading: data.delivered.actual.reading,
+                                unit: data.delivered.actual.unit
+                            }
                     }));
+                    client.end();
                     resolve();
                 });
             } catch (e) { reject(e); }
         });       
     }
 
-    const publishGas = (sensorId, data) => {
+    const publishGas = data => {
         return new Promise((resolve, reject) => {
             const client = mqtt.connect(config.host);
             
@@ -32,10 +38,11 @@ module.exports = (config) => {
                     client.publish(
                         config.topics.gas, 
                         JSON.stringify({
-                            sensor: sensorId,
                             timestamp: data.timestamp,
                             reading: data.reading,
+                            unit: data.unit
                     }));
+                    client.end();
                     resolve();
                 });
             } catch (e) { reject(e); }
