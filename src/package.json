@@ -1,6 +1,6 @@
 {
   "name": "csirmaznet-energy-meter-sensor",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "sensor.js",
   "scripts": {
