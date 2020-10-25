@@ -15,9 +15,11 @@ const logger = loggerModule();
 
 reader.on('reading', data => {
     const start = new Date();
+    const received = data.electricity.received;
+    const delivered = data.electricity.delivered;
 
-    const eReceived = data.electricity.received.actual.reading + ' ' + data.electricity.received.actual.unit;
-    const eDelivered = data.electricity.delivered.actual.reading + ' ' + data.electricity.delivered.actual.unit;
+    const eReceived = received.actual.reading + ' ' + received.actual.unit;
+    const eDelivered = delivered.actual.reading + ' ' + delivered.actual.unit;
     const gasReadings = data.gas.reading + ' ' + data.gas.unit;
 
     logger.log('Data received form sensor (received: ' + eReceived + ', delivered: ' + eDelivered + ', gas: ' + gasReadings + ')');
