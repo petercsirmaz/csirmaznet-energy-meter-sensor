@@ -1,3 +1,4 @@
+const moment = require('moment');
 const P1Reader = require('p1-reader');
 const config = require('./config.json');
 const loggerModule = require('./utils/logger.js');
@@ -14,7 +15,7 @@ const logger = loggerModule();
 // Main loop
 
 reader.on('reading', data => {
-    const start = new Date();
+    const start = moment();
     const received = data.electricity.received;
     const delivered = data.electricity.delivered;
 
@@ -38,7 +39,7 @@ reader.on('reading', data => {
                     ))
         ])
         .then(() => logger.log('Influx operations are finished.', start))
-        .catch(e => logger.log(e.message));         
+        .catch(e => logger.log('Influx error: ' + e.message));         
     }
 
     if (mqtt) {
@@ -55,7 +56,15 @@ reader.on('reading', data => {
                 ))
         ])
         .then(() => logger.log('Mqtt operations are finished.', start))
-        .catch(e => logger.log(e.message));         
+        .catch(e => logger.log('MQTT error: ' + e.message));         
+    }
+
+    if (mysql) {
+
+    }
+
+    if (rabbitmq) {
+        
     }
 });
 

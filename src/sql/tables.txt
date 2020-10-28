@@ -1,0 +1,22 @@
+electricity
+-----------
+sensor_id           VARCHAR
+equipment_id        VARCHAR
+timestamp           DATE
+tariff1_received    DOUBLE
+tariff2_received    DOUBLE
+actual_received     DOUBLE
+tariff1_delivered   DOUBLE
+tariff2_delivered   DOUBLE
+actual_delivered    DOUBLE
+tariff_indicator    INT
+switch_position     VARCHAR
+
+
+gas
+---
+sensor_id           VARCHAR
+equipment_id        VARCHAR
+timestamp           DATE
+reading             DOUBLE
+valve_position      VARCHAR

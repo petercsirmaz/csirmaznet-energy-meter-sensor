@@ -3,10 +3,10 @@ var moment = require('moment');
 module.exports = () => {
 
     const log = (message, date) => {
-        const nowDate = new Date();
-        const logMessage = '[' + moment().format('HH:mm:ss') + '] ' + message;
+        const nowDate = moment();
+        const logMessage = '[' + nowDate.format('HH:mm:ss') + '] ' + message;
         console.log(date 
-            ? logMessage + ' (' + (nowDate - date) + ' ms)'
+            ? logMessage + ' (' + moment.duration(nowDate.diff(date)) + ' ms)'
             : logMessage
         );
     }

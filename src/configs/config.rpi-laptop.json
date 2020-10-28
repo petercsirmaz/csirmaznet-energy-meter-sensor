@@ -1,0 +1,15 @@
+{
+    "sensorId": "sensor-test-1",
+    "p1": {
+        "emulator": true,
+        "debug": false
+    },
+    
+    "mysql": {
+        "host": "localhost",
+        "topics": {
+            "electricity": "home/meters/sensor1/electricity",
+            "gas": "home/meters/sensor1/gas"
+        }
+    }
+}
