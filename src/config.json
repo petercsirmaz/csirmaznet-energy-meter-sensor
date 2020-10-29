@@ -4,20 +4,15 @@
         "emulator": true,
         "debug": false
     },
-    "influx": {
-        "host": "10.10.0.178",
-        "port": 8086,
-        "database": "consumption",
-        "measurement": {
+    "mysql": {
+        "host": "127.0.0.1",
+        "port": 3306,
+        "user": "energymeter",
+        "password": "testp4ss",
+        "database": "sensors",
+        "tables": {
             "electricity": "electricity",
             "gas": "gas"
-        }
-    },
-    "mqtt": {
-        "host": "mqtt://10.10.0.178",
-        "topics": {
-            "electricity": "home/meters/sensor1/electricity",
-            "gas": "home/meters/sensor1/gas"
         }
     }
 }

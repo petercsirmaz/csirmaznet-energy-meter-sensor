@@ -4,12 +4,17 @@ const config = require('./config.json');
 const loggerModule = require('./utils/logger.js');
 const influxModule = require('./targets/influx.js');
 const mqttModule = require('./targets/mqtt.js');
+const mysqlModule = require('./targets/mysql.js');
+const rabbitmqModule = require('./targets/rabbitmq.js');
+
 
 // Configuration
 
 const reader = new P1Reader(config.p1);
 const influx = config.influx ? influxModule(config.influx) : null;
 const mqtt = config.mqtt ? mqttModule(config.mqtt) : null;
+const mysql = config.mysql ? mysqlModule(config.mysql) : null;
+const rabbitmq = null;
 const logger = loggerModule();
 
 // Main loop
@@ -60,7 +65,20 @@ reader.on('reading', data => {
     }
 
     if (mysql) {
-
+        Promise.all([
+            mysql.saveElectricity(config.sensorId, data.equipmentId, data.timestamp, data.electricity)
+                .then(() => logger.log(
+                    'Electricity readings saved to mysql database.', 
+                    start
+                )),
+            mysql.saveGas(config.sensorId,data.equipmentId, data.gas)
+                .then(() => logger.log(
+                    'Gas readings saved to the mysql database.', 
+                    start
+                    ))
+        ])
+        .then(() => logger.log('MySQL operations are finished.', start))
+        .catch(e => logger.log('MySQL error: ' + e.message));
     }
 
     if (rabbitmq) {
