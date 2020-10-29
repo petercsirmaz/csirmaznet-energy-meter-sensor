@@ -5,10 +5,10 @@
         "debug": false
     },
     "mysql": {
-        "host": "127.0.0.1",
-        "port": 3306,
+        "host": "192.168.0.12",
+        "port": 3307,
         "user": "energymeter",
-        "password": "testp4ss",
+        "password": "i5_^P}Xp*7Rp",
         "database": "sensors",
         "tables": {
             "electricity": "electricity",
