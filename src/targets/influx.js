@@ -35,17 +35,18 @@ module.exports = (config) => {
     const saveGas = (sensorId, data) => {
         return new Promise((resolve, reject) => {
             const hostname = os.hostname();
+            const { gas, equipmentId, meterType } = data;
             influx.writePoints([
                 {
                     measurement: config.measurement.gas,
                     tags: { 
                         sensor_id: sensorId,
                         sensor_os: hostname ? hostname : 'N/A',
-                        device_type: data.meterType,
-                        equipment_id: data.equipmentId
+                        device_type: meterType,
+                        equipment_id: equipmentId
                     },
                     fields: { 
-                        reading: data.reading
+                        reading: gas.reading
                     },
                 }
             ])
@@ -57,26 +58,30 @@ module.exports = (config) => {
     const saveElectricity = (sensorId, data) => {
         return new Promise((resolve, reject) => {
             const hostname = os.hostname();
+            const { equipmentId, meterType, electricity } = data;
+            const { received, delivered, numberOfPowerFailures, 
+                numberOfLongPowerFailures, switchPosition } = electricity;
+
             influx.writePoints([
                 {
                     measurement: config.measurement.electricity,
                     tags: { 
                         sensor_id: sensorId,
                         sensor_os: hostname ? hostname : 'N/A',
-                        device_type: data.meterType,
-                        equipment_id: data.equipmentId
+                        device_type: meterType,
+                        equipment_id: equipmentId
                     },
                     fields: { 
-                        received_tariff1: data.received.tariff1.reading,
-                        received_tariff2: data.received.tariff2.reading,
-                        received_actual: data.received.actual.reading,
-                        delivered_tariff1: data.delivered.tariff1.reading,
-                        delivered_tariff2: data.delivered.tariff2.reading,
-                        delivered_actual: data.delivered.actual.reading,
-                        tariff_indicator: data.tariffIndicator,
-                        number_of_power_failures: data.numberOfPowerFailures,
-                        number_of_long_power_failures: data.numberOfLongPowerFailures,
-                        switch_position: data.switchPosition,
+                        received_tariff1: received.tariff1.reading,
+                        received_tariff2: received.tariff2.reading,
+                        received_actual: received.actual.reading,
+                        delivered_tariff1: delivered.tariff1.reading,
+                        delivered_tariff2: delivered.tariff2.reading,
+                        delivered_actual: delivered.actual.reading,
+                        tariff_indicator: tariffIndicator,
+                        number_of_power_failures: numberOfPowerFailures,
+                        number_of_long_power_failures: numberOfLongPowerFailures,
+                        switch_position: switchPosition,
                     },
                 }
             ])

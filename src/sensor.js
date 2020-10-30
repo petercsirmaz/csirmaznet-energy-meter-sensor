@@ -16,69 +16,88 @@ const mqtt = config.mqtt ? mqttModule(config.mqtt) : null;
 const mysql = config.mysql ? mysqlModule(config.mysql) : null;
 const rabbitmq = null;
 const logger = loggerModule();
+const datastore = [];
 
 // Main loop
 
 reader.on('reading', data => {
     const start = moment();
-    const received = data.electricity.received;
-    const delivered = data.electricity.delivered;
+    const { electricity, gas } = data;
+    const { received, delivered } = electricity;
+    const { sensorId } = config;
 
-    const eReceived = received.actual.reading + ' ' + received.actual.unit;
-    const eDelivered = delivered.actual.reading + ' ' + delivered.actual.unit;
-    const gasReadings = data.gas.reading + ' ' + data.gas.unit;
+    const eReceived = `${received.actual.reading} ${received.actual.unit}`;
+    const eDelivered = `${delivered.actual.reading} ${delivered.actual.unit}`;
+    const gasReadings = `${gas.reading} ${gas.unit}`;
+    let gasReadingUpdated = true;
 
-    logger.log('Data received form sensor (received: ' + eReceived + ', delivered: ' + eDelivered + ', gas: ' + gasReadings + ')');
+    if (!datastore[0]) { datastore.push(data); }
+    else { 
+        gasReadingUpdated = datastore[0].gas.timestamp != data.gas.timestamp; 
+        datastore[0] = data;
+    }    
+
+    logger.log(
+        `Data received form sensor (received: ${eReceived}, delivered: ${eDelivered}, gas: ${gasReadings}`);
+    if (gasReadingUpdated) { logger.log('Gas reading has updated'); }
 
     if (influx) {
         Promise.all([
-            influx.saveElectricity(config.sensorId, data.electricity)
+            influx
+                .saveElectricity(sensorId, data)
                 .then(() => logger.log(
                     'Electricity readings saved to influx database.', 
                     start
                 )),
-            influx.saveGas(config.sensorId, data.gas)
-                .then(() => logger.log(
-                    'Gas readings saved to the influx database.', 
-                    start
+            gasReadingUpdated 
+                ? influx
+                    .saveGas(sensorId, data)
+                    .then(() => logger.log(
+                        'Gas readings saved to the influx database.', 
+                        start
                     ))
+                : Promise.resolve()
         ])
         .then(() => logger.log('Influx operations are finished.', start))
-        .catch(e => logger.log('Influx error: ' + e.message));         
+        .catch(e => logger.log(`Influx error: ${e.message}`));         
     }
 
     if (mqtt) {
         Promise.all([
-            mqtt.publishElectricity(data.electricity, data.timestamp)
+            mqtt.publishElectricity(sensorId, data)
                 .then(() => logger.log(
                     'Electricity readings published on mqtt borker.',
                     start
                 )),
-            mqtt.publishGas(data.gas)
-                .then(() => logger.log(
-                    'Gas readings published on mqtt borker.',
-                    start,
-                ))
+            gasReadingUpdated 
+                ? mqtt.publishGas(sensorId, data)
+                    .then(() => logger.log(
+                        'Gas readings published on mqtt borker.',
+                        start,
+                    ))
+                : Promise.resolve()
         ])
-        .then(() => logger.log('Mqtt operations are finished.', start))
-        .catch(e => logger.log('MQTT error: ' + e.message));         
+        .then(() => logger.log('MQTT operations are finished.', start))
+        .catch(e => logger.log(`MQTT error: ${e.message}`));         
     }
 
     if (mysql) {
         Promise.all([
-            mysql.saveElectricity(config.sensorId, data.equipmentId, data.timestamp, data.electricity)
+            mysql.saveElectricity(sensorId, data)
                 .then(() => logger.log(
                     'Electricity readings saved to mysql database.', 
                     start
                 )),
-            mysql.saveGas(config.sensorId,data.equipmentId, data.gas)
-                .then(() => logger.log(
-                    'Gas readings saved to the mysql database.', 
-                    start
-                    ))
+            gasReadingUpdated 
+                ? mysql.saveGas(sensorId, data)
+                    .then(() => logger.log(
+                        'Gas readings saved to the mysql database.', 
+                        start
+                        ))
+                : Promise.resolve()
         ])
         .then(() => logger.log('MySQL operations are finished.', start))
-        .catch(e => logger.log('MySQL error: ' + e.message));
+        .catch(e => logger.log(`MySQL error: ${e.message}`));
     }
 
     if (rabbitmq) {

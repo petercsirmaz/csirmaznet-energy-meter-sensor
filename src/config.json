@@ -3,16 +3,5 @@
     "p1": {
         "emulator": true,
         "debug": false
-    },
-    "mysql": {
-        "host": "192.168.0.12",
-        "port": 3307,
-        "user": "energymeter",
-        "password": "i5_^P}Xp*7Rp",
-        "database": "sensors",
-        "tables": {
-            "electricity": "electricity",
-            "gas": "gas"
-        }
     }
 }

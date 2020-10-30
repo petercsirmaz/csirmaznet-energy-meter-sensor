@@ -13,9 +13,10 @@ module.exports = (config) => {
         });
     }
     
-    const saveElectricity = (sensorId, equipmentId, timestamp, data) => {
+    const saveElectricity = (sensorId, { equipmentId, timestamp, electricity}) => {
         return new Promise((resolve, reject) => {
             const mysql = getConnection(config);
+            const { received, delivered, tariffIndicator, switchPosition } = electricity;
 
             try {
                 mysql.connect(error => {
@@ -27,14 +28,14 @@ module.exports = (config) => {
                         sensorId,
                         equipmentId,
                         new Date(timestamp),
-                        data.received.tariff1.reading,
-                        data.received.tariff2.reading,
-                        data.received.actual.reading,
-                        data.delivered.tariff1.reading,
-                        data.delivered.tariff2.reading,
-                        data.delivered.actual.reading,
-                        data.tariffIndicator,
-                        data.switchPosition
+                        received.tariff1.reading,
+                        received.tariff2.reading,
+                        received.actual.reading,
+                        delivered.tariff1.reading,
+                        delivered.tariff2.reading,
+                        delivered.actual.reading,
+                        tariffIndicator,
+                        switchPosition
                     ];
 
                     mysql.query(statement, values, (error) => {
@@ -48,10 +49,11 @@ module.exports = (config) => {
         });       
     }
 
-    const saveGas = (sensorId, equipmentId, data) => {
+    const saveGas = (sensorId, { equipmentId, gas }) => {
         return new Promise((resolve, reject) => {
             const mysql = getConnection(config);
-            
+            const { timestamp, reading, valvePosition } = gas;
+
             try {
                 mysql.connect(error => {
                     if (error) reject(error.message);
@@ -61,9 +63,9 @@ module.exports = (config) => {
                     const values = [
                         sensorId,
                         equipmentId,
-                        new Date(data.timestamp),
-                        data.reading,
-                        data.valvePosition
+                        new Date(timestamp),
+                        reading,
+                        valvePosition
                     ];
                     
                     mysql.query(statement, values, (error) => {
