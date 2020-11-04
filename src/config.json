@@ -3,5 +3,16 @@
     "p1": {
         "emulator": true,
         "debug": false
+    },
+    "rabbitmq": {
+        "host": "localhost",
+        "port": 5672,
+        "user": "guest",
+        "password": "guest",
+        "exchange": "",
+        "queues": {
+            "electricity": "electricity",
+            "gas": "gas"
+        }
     }
 }

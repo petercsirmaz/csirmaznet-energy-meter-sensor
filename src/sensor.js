@@ -10,13 +10,13 @@ const rabbitmqModule = require('./targets/rabbitmq.js');
 
 // Configuration
 
+const logger = loggerModule();
 const reader = new P1Reader(config.p1);
 const influx = config.influx ? influxModule(config.influx) : null;
 const mqtt = config.mqtt ? mqttModule(config.mqtt) : null;
 const mysql = config.mysql ? mysqlModule(config.mysql) : null;
-const rabbitmq = null;
-const logger = loggerModule();
-const datastore = [];
+const rabbitmq = config.rabbitmq ? rabbitmqModule(config.rabbitmq, logger) : null;
+let lastState = null;
 
 // Main loop
 
@@ -29,16 +29,12 @@ reader.on('reading', data => {
     const eReceived = `${received.actual.reading} ${received.actual.unit}`;
     const eDelivered = `${delivered.actual.reading} ${delivered.actual.unit}`;
     const gasReadings = `${gas.reading} ${gas.unit}`;
-    let gasReadingUpdated = true;
-
-    if (!datastore[0]) { datastore.push(data); }
-    else { 
-        gasReadingUpdated = datastore[0].gas.timestamp != data.gas.timestamp; 
-        datastore[0] = data;
-    }    
+    const gasReadingUpdated = lastState ? lastState.gas.timestamp != data.gas.timestamp : true; 
+    
+    lastState = data;
 
     logger.log(
-        `Data received form sensor (received: ${eReceived}, delivered: ${eDelivered}, gas: ${gasReadings}`);
+        `Data received form sensor (received: ${eReceived}, delivered: ${eDelivered}, gas: ${gasReadings})`);
     if (gasReadingUpdated) { logger.log('Gas reading has updated'); }
 
     if (influx) {
@@ -101,7 +97,22 @@ reader.on('reading', data => {
     }
 
     if (rabbitmq) {
-        
+        Promise.all([
+            rabbitmq.publishElectricity(sensorId, data)
+                .then(() => logger.log(
+                    'Electricity readings published on RabbitMQ queue.',
+                    start
+                )),
+            gasReadingUpdated 
+                ? rabbitmq.publishGas(sensorId, data)
+                    .then(() => logger.log(
+                        'Gas readings published on RabbitMQ queue.',
+                        start,
+                    ))
+                : Promise.resolve()
+        ])
+        .then(() => logger.log('RabbitMQ operations are finished.', start))
+        .catch(e => logger.log(`RabbitMQ error: ${e.message}`));   
     }
 });
 
