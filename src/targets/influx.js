@@ -1,9 +1,10 @@
 const os = require('os');
 const Influx = require('influx');
 
-module.exports = (config) => {
+module.exports = (config, logger) => {
     const influx = new Influx.InfluxDB({
         host: config.host,
+        port: config.port,
         database: config.database,
         schema: [
             {
@@ -31,8 +32,10 @@ module.exports = (config) => {
             }
         ]
     });
+
+    logger.log(`InfluxDB: module initialized to connect ${config.host}:${config.port}`);
     
-    const saveGas = (sensorId, data) => {
+    const handleGas = (sensorId, data) => {
         return new Promise((resolve, reject) => {
             const hostname = os.hostname();
             const { gas, equipmentId, meterType } = data;
@@ -55,11 +58,11 @@ module.exports = (config) => {
         });
     }
 
-    const saveElectricity = (sensorId, data) => {
+    const handleElectricity = (sensorId, data) => {
         return new Promise((resolve, reject) => {
             const hostname = os.hostname();
             const { equipmentId, meterType, electricity } = data;
-            const { received, delivered, numberOfPowerFailures, 
+            const { received, delivered, numberOfPowerFailures, tariffIndicator,
                 numberOfLongPowerFailures, switchPosition } = electricity;
 
             influx.writePoints([
@@ -91,7 +94,14 @@ module.exports = (config) => {
     };
 
     return {
-        saveElectricity: saveElectricity,
-        saveGas: saveGas
+        name: 'InfluxDB',
+        messages: {
+            successElectricity: 'Electricity readings saved to InfluxDB database.',
+            successGas: 'Gas readings saved to the InfluxDB database.',
+            finished: 'InfluxDB operations are finished.',
+            error: 'InfluxDB error:'
+        },
+        handleElectricity: handleElectricity,
+        handleGas: handleGas
     }
 }

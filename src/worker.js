@@ -19,11 +19,17 @@ amqp.connect(`amqp://${user}:${password}@${host}:${port}`)
                 logger.log(`Channel opened`);
 
                 channel.assertQueue(queues.electricity, { durable: true });
+                channel.assertQueue(queues.gas, { durable: true });
                 channel.prefetch(1);
-                logger.log(`Waiting for messages in ${queues.electricity}. To exit press CTRL+C`);
+                logger.log(`Waiting for messages in ${queues.electricity} and ${queues.gas}. To exit press CTRL+C`);
 
                 channel.consume(queues.electricity, message => {
-                    logger.log(`Message received: ${message.content.toString()}`);
+                    logger.log(`Electricity message received: ${message.content.toString()}`);
+                    channel.ack(message);
+                });
+
+                channel.consume(queues.gas, message => {
+                    logger.log(`Gas message received: ${message.content.toString()}`);
                     channel.ack(message);
                 });
             })

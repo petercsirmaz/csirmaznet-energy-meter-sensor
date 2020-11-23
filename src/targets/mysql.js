@@ -1,7 +1,9 @@
 
 const Mysql = require('mysql');
 
-module.exports = (config) => {
+module.exports = (config, logger) => {
+
+    logger.log(`MySQL: module initialized to connect ${config.host}:`);
 
     const getConnection = config => {
         return Mysql.createConnection({
@@ -13,7 +15,7 @@ module.exports = (config) => {
         });
     }
     
-    const saveElectricity = (sensorId, { equipmentId, timestamp, electricity}) => {
+    const handleElectricity = (sensorId, { equipmentId, timestamp, electricity}) => {
         return new Promise((resolve, reject) => {
             const mysql = getConnection(config);
             const { received, delivered, tariffIndicator, switchPosition } = electricity;
@@ -49,7 +51,7 @@ module.exports = (config) => {
         });       
     }
 
-    const saveGas = (sensorId, { equipmentId, gas }) => {
+    const handleGas = (sensorId, { equipmentId, gas }) => {
         return new Promise((resolve, reject) => {
             const mysql = getConnection(config);
             const { timestamp, reading, valvePosition } = gas;
@@ -82,7 +84,14 @@ module.exports = (config) => {
     }
 
     return {
-        saveElectricity: saveElectricity,
-        saveGas: saveGas
+        name: 'MySQL',
+        messages: {
+            successElectricity: 'Electricity readings saved to MySQL database.',
+            successGas: 'Gas readings saved to the MySQL database.',
+            finished: 'MySQL operations are finished.',
+            error: 'MySQL error:'
+        },
+        handleElectricity: handleElectricity,
+        handleGas: handleGas
     }
 }

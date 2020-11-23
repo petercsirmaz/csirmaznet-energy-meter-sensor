@@ -4,20 +4,38 @@
         "emulator": true,
         "debug": false
     },
-    "influx": {
-        "host": "10.10.0.178",
-        "port": 8086,
-        "database": "consumption",
-        "measurement": {
-            "electricity": "electricity",
-            "gas": "gas"
+    "targets": [
+        {
+            "type": "rabbitmq",
+            "host": "localhost",
+            "port": 5672,
+            "user": "guest",
+            "password": "guest",
+            "exchange": "",
+            "queues": {
+                "electricity": "electricity",
+                "gas": "gas"
+            }
+        },
+        {
+            "type": "mqtt",
+            "protocol": "mqtt",
+            "host": "localhost",
+            "port": 1883,
+            "topics": {
+                "electricity": "home/meters/sensor1/electricity",
+                "gas": "home/meters/sensor1/gas"
+            }
+        },
+        {
+            "type": "influx",
+            "host": "10.10.0.178",
+            "port": 8086,
+            "database": "consumption",
+            "measurement": {
+                "electricity": "electricity",
+                "gas": "gas"
+            }
         }
-    },
-    "mqtt": {
-        "host": "mqtt://10.10.0.178",
-        "topics": {
-            "electricity": "home/meters/sensor1/electricity",
-            "gas": "home/meters/sensor1/gas"
-        }
-    }
+    ]
 }

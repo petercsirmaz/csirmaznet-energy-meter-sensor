@@ -4,15 +4,16 @@
         "emulator": true,
         "debug": false
     },
-    "rabbitmq": {
-        "host": "localhost",
-        "port": 5672,
-        "user": "guest",
-        "password": "guest",
-        "exchange": "",
-        "queues": {
-            "electricity": "electricity",
-            "gas": "gas"
+    "targets": [
+        {
+            "type": "influx",
+            "host": "10.10.0.178",
+            "port": 8086,
+            "database": "consumption",
+            "measurement": {
+                "electricity": "electricity",
+                "gas": "gas"
+            }
         }
-    }
+    ]
 }

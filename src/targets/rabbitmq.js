@@ -13,14 +13,14 @@ module.exports = (config, logger) => {
         password: password
     }).then(conn => {
         connection = conn;
-        logger.log(`rabbitmq: Connected to ${host}:${port}`);
+        logger.log(`RabbitMQ: Connected to ${host}:${port}`);
         connection.createChannel().then(chnl => {
             channel = chnl;
-            logger.log(`[rabbitmq] Channel opened`);
+            logger.log(`RabbitMQ: Channel opened`);
         })
-    }).catch(error => logger.log(`rabbitmq: Error on connection: ${error}`));
+    }).catch(error => logger.log(`RabbitMQ: Error on connection: ${error}`));
     
-    const publishElectricity = (sensorId, data) => {
+    const handleElectricity = (sensorId, data) => {
         return new Promise((resolve, reject) => {
             if (!connection || !channel) { 
                 reject('No connecction or channel open'); 
@@ -42,38 +42,43 @@ module.exports = (config, logger) => {
                     persistent: true
             });
             resolve();
-
         });
     };
     
-    const publishGas = (sensorId, data) => {
+    const handleGas = (sensorId, data) => {
         return new Promise((resolve, reject) => {
 
+            if (!connection || !channel) { 
+                reject('No connecction or channel open'); 
+            }
+
+            const queue = config.queues.gas;
+            const { equipmentId,  gas } = data;
+            const { timestamp, reading } = gas;
+            const message = {
+                sensorId: sensorId,
+                equipmentId: equipmentId,
+                timestamp: timestamp,
+                reading: reading
+            };
+
+            channel.assertQueue(queue, { durable: true });
+            channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
+                    persistent: true
+            });
             resolve();
-            // const connection = getConnection();
-            // connection.createChannel((error, channel) => {
-            //     if (error) { reject(error); return; }
-
-            //     const queue = config.queues.gas;
-            //     const { equipmentId,  gas } = data;
-            //     const { timestamp, reading } = electricity;
-            //     const msg = {
-            //         sensorId: sensorId,
-            //         equipmentId: equipmentId,
-            //         timestamp: timestamp,
-            //         reading: reading
-            //     };
-            //     channel.assertQueue(queue, { durable: true });
-            //     channel.sendToQueue(queue, Buffer.from(msg), { persitent: true });
-
-            //     connection.close();
-            //     resolve();
-            // });
         });
     }
     
     return {
-        publishElectricity: publishElectricity,
-        publishGas: publishGas
+        name: 'RabbitMQ',
+        messages: {
+            successElectricity: 'Electricity readings published on RabbitMQ queue.',
+            successGas: 'Gas readings published on RabbitMQ queue.',
+            finished: 'RabbitMQ operations are finished.',
+            error: 'RabbitMQ error:'
+        },
+        handleElectricity: handleElectricity,
+        handleGas: handleGas,
     }
 }
